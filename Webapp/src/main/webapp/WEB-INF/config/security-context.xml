@@ -1,0 +1,46 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+	<http  auto-config="true"  disable-url-rewriting="false" use-expressions="true" >
+		<headers disabled="true" />
+		<intercept-url pattern="/login/**" access="permitAll"/>
+		 <!--  <intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />-->
+		<intercept-url pattern="/operator/**" access="permitAll" />
+		<intercept-url pattern="/agent/**" access="hasRole('ROLE_AGENT')" />
+		<form-login login-page="/login/loginPage" 
+			default-target-url="/login/loginPass" 
+			login-processing-url="/j_spring_security_check" 
+			username-parameter="j_username" password-parameter="j_password"
+		 	always-use-default-target="true" 
+		 	authentication-failure-url="/login/loginFailed" />
+		 	<!-- authentication-success-handler-ref="savedRequestAwareAuthenticationSuccessHandler"  -->
+		<logout logout-url="/login/logout" invalidate-session="true" 
+			logout-success-url="/login/loginPage" delete-cookies="JSESSIONID" />
+		<csrf disabled="true"/>
+		<!-- <csrf request-matcher-ref="csrfSecurityRequestMatcher"  /> -->
+		<!-- <remember-me 
+		    token-validity-seconds="1209600"
+			remember-me-parameter="remember-me" 
+			data-source-ref="dataSource" /> -->
+	</http>
+	
+	<authentication-manager>
+			<authentication-provider>
+			<jdbc-user-service data-source-ref="dataSource"
+				users-by-username-query="
+					select email,password,enabled
+					from user where email=?" 
+				authorities-by-username-query="
+					select u.email, r.rolename from user u, role r 
+					where r.roleid=u.roleid and  u.email=?"
+				/>
+			</authentication-provider>
+	</authentication-manager> 
+	
+
+	
+</beans:beans>
